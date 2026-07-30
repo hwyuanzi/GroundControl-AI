@@ -2,7 +2,7 @@ import logging
 import random
 from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import text
 from app.core.database import engine
 from app.models.models import Incursion, IncursionCategory, Airport, Airline
 
@@ -28,7 +28,6 @@ NARRATIVE_TEMPLATES = [
 ]
 
 def generate_mock_incursions(num_events=2500):
-    from sqlalchemy import text
     with Session(engine) as db:
         # Get random selection of airports (prioritize large ones)
         large_airports = db.query(Airport).filter(Airport.type == 'large_airport').limit(50).all()
@@ -36,7 +35,7 @@ def generate_mock_incursions(num_events=2500):
             logger.warning("No large airports found. Ensure seed_airports is run first.")
             return
 
-        airlines = db.query(Airline).filter(Airline.active == 'Y').limit(50).all()
+        airlines = db.query(Airline).filter(Airline.active.is_(True)).limit(50).all()
         if not airlines:
             logger.warning("No airlines found.")
             return
@@ -89,7 +88,7 @@ def generate_mock_incursions(num_events=2500):
                 aircraft_count=random.choice([1, 2, 2, 2, 3]),
                 fatalities=0,
                 injuries=0,
-                source_url=f"https://asias.faa.gov/search?q={airport.iata_code or airport.id}",
+                source_url=None,
             )
             db.add(inc)
             inserted += 1
@@ -98,7 +97,7 @@ def generate_mock_incursions(num_events=2500):
         
         # Update cache counts ONLY for airports that have incursions
         db.execute(
-            func.text('''
+            text('''
             UPDATE airports
             SET incursion_count = subquery.cnt
             FROM (

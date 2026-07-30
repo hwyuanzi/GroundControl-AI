@@ -96,7 +96,7 @@ export default function AirlinesPage() {
       <div className="glass-card" style={{ padding: "1.25rem", marginBottom: "1.5rem", background: "rgba(29, 111, 243, 0.05)", borderLeft: "4px solid #4d94ff" }}>
         <h3 style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "#fff" }}>Why track Airline data?</h3>
         <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.5 }}>
-          Explore active flight operators worldwide. An airline's home country and fleet size often heavily correlate with their regulatory safety adherence. By cross-referencing airlines with our Incursion database, safety inspectors can identify patterns of Pilot Deviations or specific crew training deficiencies across different carriers.
+          Explore active flight operators and cross-reference carriers with the incident records loaded in the local database. The directory is a research interface, not a certified carrier safety assessment.
         </p>
       </div>
 

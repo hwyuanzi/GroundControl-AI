@@ -1,85 +1,125 @@
-# GroundControl AI: Aviation Safety & Optimization Platform
+# GroundControl AI
 
-> "Safety is not an accident. It is a result of structural analysis, proactive intelligence, and uncompromising vigilance."
+GroundControl AI is a research/demo application for exploring airport, airline,
+runway-incursion, taxi-routing, and surface-congestion data. It combines a
+FastAPI API, PostgreSQL/PostGIS, and a Next.js frontend.
 
-GroundControl AI is an advanced research and analytics platform designed to visualize, analyze, and mitigate risks in airport ground operations. Born from a passion for aviation and data science, this project leverages machine learning and real-time simulation to address the growing complexities of runway incursions and taxiway congestion.
+## Current functionality
 
----
+- Search and filter airport, airline, and incursion records stored in PostgreSQL.
+- View aggregate dashboard statistics and geolocated incident data.
+- Run a client-side JFK taxi simulation.
+- Query a simplified JFK taxiway graph and A*-based route optimizer.
+- Generate a congestion estimate from a model trained on synthetic patterns.
+- Optionally request live JFK-area aircraft positions from OpenSky.
 
-## The Mission & Context
+This is an educational prototype, not an operational aviation-safety system.
 
-### The Spark: Air Canada Express Flight 8646 (LGA)
-On **March 22, 2026**, Air Canada Express Flight 8646 collided with an airport firefighting truck (ARFF) while landing at LaGuardia Airport (LGA). This tragic event, occurring during low-visibility conditions, highlighted a critical gap in ground surface situational awareness and communication.
+## Prerequisites
 
-As a software engineer and data analyst with a lifelong passion for the aviation industry, this incident served as a wake-up call. I envisioned a platform that could:
-- **Democratize Safety Data**: Make complex NTSB and FAA ASIAS records accessible and navigable.
-- **Predict Risk**: Use AI to identify "Hotspots" and calculate safety confidence scores for carriers and airports.
-- **Optimize Ground Flow**: Reduce taxi-out times to minimize fuel waste, carbon emissions, and pilot fatigue.
+- Python 3.12 and Pipenv
+- Node.js 20.9 or newer and npm
+- Docker with Docker Compose
 
-GroundControl AI is my contribution toward a future where "zero incursions" isn't just a goal, but a structural reality.
+## Local setup
 
----
+Start PostgreSQL:
 
-## Getting Started
-
-Follow these steps to launch the GroundControl AI environment on your local machine.
-
-### Prerequisites
-- **Python 3.10+** & **pipenv**
-- **Node.js 18+** & **npm**
-- **Docker** & **Docker Compose**
-
-### 1. Database Initialization
-GroundControl AI uses PostgreSQL with PostGIS for spatial analytics. Use Docker to spin up the database:
 ```bash
-docker-compose up -d db
+docker compose up -d db
 ```
 
-### 2. Backend Setup (FastAPI)
-Navigate to the backend directory and install dependencies:
+Install and configure the backend:
+
 ```bash
 cd backend
-pipenv install
-```
-Generate the required data and seed the database:
-```bash
-# Initialize schema and seed airport/airline/incursion data
-pipenv run python main.py
-```
-Start the API server:
-```bash
-pipenv run uvicorn app.main:app --reload
+cp .env.example .env
+PIPENV_VENV_IN_PROJECT=1 pipenv install --dev
 ```
 
-### 3. Frontend Setup (Next.js)
-In a new terminal window, navigate to the frontend directory:
+Create the schema and load demo data. The first command downloads public airport
+and airline datasets; the later commands generate synthetic taxi statistics and
+incursion records.
+
+```bash
+pipenv run python -m app.data_pipeline.seed_airports
+pipenv run python -m app.data_pipeline.seed_stats
+pipenv run python -m app.data_pipeline.seed_incursions
+```
+
+Start the API from `backend/`:
+
+```bash
+pipenv run uvicorn main:app --reload
+```
+
+The API is available at `http://localhost:8000`; Swagger UI is at
+`http://localhost:8000/api/docs`.
+
+In another terminal, install and start the frontend:
+
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
-The application will be available at `http://localhost:3000`.
 
----
+The application is available at `http://localhost:3000`.
 
-## Features
+## Environment variables
 
-- **Incursion Explorer**: Searchable database of thousands of safety records with AI-extracted root causes.
-- **Airport & Airline Analytics**: Deep-dive safety profiles featuring Recharts visualizations and ML safety scores.
-- **JFK AI Routing Sandbox**: A high-fidelity 2D simulation of John F. Kennedy International Airport (JFK) demonstrating AI vs. Rule-based taxi routing.
-- **Global Hotspots**: Interactive map visualizing historic runway incursions globally.
+Backend variables are documented in `backend/.env.example`:
 
----
+- `DATABASE_URL`: PostgreSQL connection URL.
+- `ALLOWED_ORIGINS`: JSON array of allowed browser origins.
+- `OPENSKY_USERNAME` and `OPENSKY_PASSWORD`: optional OpenSky credentials.
+
+Frontend/server variables:
+
+- `NEXT_PUBLIC_API_URL`: browser-visible API URL; defaults to
+  `http://localhost:8000` and must be set when building for another host.
+- `API_URL`: optional server-side API URL, useful when the frontend and API run
+  on the same private container network.
+
+## Tests and build
+
+```bash
+cd backend
+PIPENV_VENV_IN_PROJECT=1 pipenv install --dev
+pipenv run pytest -q
+
+cd ../frontend
+npm ci
+npm run lint
+npm run build
+```
+
+## Docker deployment
+
+Build and start all services:
+
+```bash
+docker compose up --build -d
+docker compose exec backend python -m app.data_pipeline.seed_airports
+docker compose exec backend python -m app.data_pipeline.seed_stats
+docker compose exec backend python -m app.data_pipeline.seed_incursions
+```
+
+For non-local deployment, set strong PostgreSQL credentials, set
+`NEXT_PUBLIC_API_URL` before building the frontend image, set appropriate CORS
+origins, and use managed schema migrations/backups rather than the demo seed
+workflow.
+
+## Known limitations
+
+- Incursion and taxi-time seed data are synthetic demo data.
+- Congestion predictions use synthetic training patterns and are not validated
+  operational forecasts.
+- Live aircraft data and taxi routing are currently limited to JFK; OpenSky
+  availability and rate limits can cause empty results.
+- The project does not yet include authentication, Alembic migrations, or a
+  production deployment pipeline.
 
 ## License
 
-Distributed under the **Apache License 2.0**. See `LICENSE` for more information. This project is ideal for both research and commercial adaptation.
-
----
-
-## Developed By
-
-**Hollan (Haowen) Yuan**
-*Software Engineer | Data Scientist | Aviation Enthusiast*
-
-*"Aiming for safer skies, one node at a time."*
+Apache License 2.0. See `LICENSE`.

@@ -2,9 +2,9 @@
 import { useEffect, useState, use } from "react";
 import { fetchAirline, fetchIncursions } from "@/app/lib/api";
 import type { Airline, Incursion } from "@/app/types";
-import { Plane, AlertTriangle, ArrowLeft, ShieldAlert, Globe, ServerCog } from "lucide-react";
+import { Plane, ArrowLeft, ShieldAlert, Globe, ServerCog } from "lucide-react";
 import Link from "next/link";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Cell, LineChart, Line } from "recharts";
+import { XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, LineChart, Line } from "recharts";
 
 function InfoRow({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -32,8 +32,8 @@ export default function AirlineDetailPage(props: { params: Promise<{ id: string 
         // Load recent incursions associated with this airline
         const incData = await fetchIncursions({ airline_id: id, page_size: 10, sort_by: "date", sort_order: "desc" });
         setIncursions(incData.results);
-      } catch (err: any) {
-        if (err.message.includes("404")) {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.message.includes("404")) {
           setError("Airline not found or inactive.");
         } else {
           setError("Could not load airline data from the API.");
@@ -48,7 +48,7 @@ export default function AirlineDetailPage(props: { params: Promise<{ id: string 
   if (loading) return <div style={{ textAlign: "center", padding: "4rem", color: "rgba(255,255,255,0.35)" }}>Analyzing Carrier Profiles...</div>;
   if (error || !airline) return <div style={{ textAlign: "center", padding: "4rem", color: "#f87171" }}>{error}</div>;
 
-  // ML Safety Score calculation (Mocked from historical incursions)
+  // Simple demo indicator calculated from the most recent incidents.
   const penalty = incursions.reduce((acc, inc) => {
     if (inc.category === "A") return acc + 25;
     if (inc.category === "B") return acc + 10;
@@ -58,21 +58,14 @@ export default function AirlineDetailPage(props: { params: Promise<{ id: string 
   const safetyScore = Math.max(0, Math.min(100, 100 - penalty));
   const scoreColor = safetyScore > 85 ? "#22c55e" : safetyScore > 60 ? "#facc15" : "#f87171";
 
-  // Mock historic trend data over the last 12 months for the chart
-  const trendData = [
-    { month: "Jan", incidents: Math.floor(Math.random() * 3) },
-    { month: "Feb", incidents: Math.floor(Math.random() * 2) },
-    { month: "Mar", incidents: Math.floor(Math.random() * 4) },
-    { month: "Apr", incidents: Math.floor(Math.random() * 2) },
-    { month: "May", incidents: Math.floor(Math.random() * 3) },
-    { month: "Jun", incidents: incursions.length > 2 ? 1 : 0 },
-    { month: "Jul", incidents: Math.floor(Math.random() * 2) },
-    { month: "Aug", incidents: Math.floor(Math.random() * 3) },
-    { month: "Sep", incidents: Math.floor(Math.random() * 1) },
-    { month: "Oct", incidents: Math.floor(Math.random() * 4) },
-    { month: "Nov", incidents: Math.floor(Math.random() * 3) },
-    { month: "Dec", incidents: Math.floor(Math.random() * 2) },
-  ];
+  const trendData = Array.from({ length: 12 }, (_, month) => ({
+    month: new Intl.DateTimeFormat("en", { month: "short" }).format(
+      new Date(2024, month, 1),
+    ),
+    incidents: incursions.filter(
+      (incident) => new Date(incident.date).getUTCMonth() === month,
+    ).length,
+  }));
 
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto", padding: "2rem" }}>
@@ -110,7 +103,7 @@ export default function AirlineDetailPage(props: { params: Promise<{ id: string 
       <div className="glass-card" style={{ padding: "1.25rem", marginBottom: "1.5rem", background: "rgba(139, 92, 246, 0.05)", borderLeft: "4px solid #8b5cf6" }}>
         <h3 style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "#fff", display: "flex", alignItems: "center", gap: "0.375rem" }}><ServerCog size={16} /> Machine Learning Safety Analytics</h3>
         <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.5 }}>
-          Our neural networks continuously analyze this carrier's historic runway deviations and root-cause taxonomies. We project their <b>AI Safety Security Score</b> against global baselines. Airlines scoring below 75 are typically flagged for mandatory systemic training review.
+          This demo indicator applies a transparent severity penalty to the carrier&apos;s most recent incident records. It is not a certified safety rating or a machine-learning risk assessment.
         </p>
       </div>
 
@@ -120,7 +113,7 @@ export default function AirlineDetailPage(props: { params: Promise<{ id: string 
         {/* ML Safety Score */}
         <div className="glass-card" style={{ padding: "2rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
           <h2 style={{ fontSize: "0.9rem", fontWeight: 700, marginBottom: "1rem", color: "rgba(255,255,255,0.7)", letterSpacing: "0.05em", textTransform: "uppercase" }}>
-            AI Safety Security Score
+            Recent Incident Indicator
           </h2>
           <div style={{ position: "relative", width: "160px", height: "160px", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "50%", background: `radial-gradient(circle, rgba(0,0,0,0) 50%, ${scoreColor}20 100%)`, border: `4px solid ${scoreColor}` }}>
             <span style={{ fontSize: "3rem", fontWeight: 800, color: scoreColor }}>{safetyScore}</span>
@@ -134,7 +127,7 @@ export default function AirlineDetailPage(props: { params: Promise<{ id: string 
         {/* 12 Month Trend */}
         <div className="glass-card" style={{ padding: "1.5rem" }}>
           <h2 style={{ fontSize: "0.9rem", fontWeight: 700, marginBottom: "1rem", color: "rgba(255,255,255,0.7)" }}>
-            12-Month Incident Projection
+            Incidents by Calendar Month
           </h2>
           <div style={{ width: "100%", height: 180 }}>
             <ResponsiveContainer>

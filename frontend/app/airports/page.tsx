@@ -2,8 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { fetchAirports } from "@/app/lib/api";
 import type { Airport, PaginatedResponse } from "@/app/types";
-import { Search, Building2, ArrowUpDown, SlidersHorizontal, ChevronLeft, ChevronRight, Plane } from "lucide-react";
-import Link from "next/link";
+import { Search, Building2, ArrowUpDown, ChevronLeft, ChevronRight, Plane } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 const CONTINENTS = [
@@ -104,7 +103,7 @@ export default function AirportsPage() {
         sort_by: sortBy, sort_order: sortOrder,
       });
       setData(result);
-    } catch (e) {
+    } catch {
       setError("Could not connect to API. Make sure the backend is running.");
     } finally {
       setLoading(false);

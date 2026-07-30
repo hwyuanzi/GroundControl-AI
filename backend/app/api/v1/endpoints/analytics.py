@@ -23,6 +23,7 @@ from app.analytics.incursion_detector import (
     get_detector_for_airport,
 )
 from app.analytics.taxi_optimizer import JFK_EDGES, JFK_NODES, TaxiRoute, get_optimizer
+from app.core.config import settings
 from app.services.opensky_client import StateVector, get_opensky_client
 
 logger = logging.getLogger(__name__)
@@ -130,6 +131,12 @@ def compute_taxi_route(req: RouteRequest):
     The optimizer incorporates real-time congestion predictions from the
     RandomForest congestion model, making routes dynamically adaptive.
     """
+    if req.airport_icao.upper() != "KJFK":
+        raise HTTPException(
+            status_code=404,
+            detail=f"Graph data for {req.airport_icao} not yet available.",
+        )
+
     optimizer = get_optimizer(req.airport_icao.upper())
     congestion_model = get_congestion_model()
 
@@ -178,7 +185,10 @@ def get_congestion(
     surface_count = n_aircraft
     if airport_icao.upper() == "KJFK":
         try:
-            client = get_opensky_client()
+            client = get_opensky_client(
+                settings.OPENSKY_USERNAME,
+                settings.OPENSKY_PASSWORD,
+            )
             ground = client.get_ground_traffic_jfk()
             surface_count = len(ground)
         except Exception:
@@ -210,7 +220,10 @@ def get_live_flights(airport_icao: str = Query("KJFK")):
         raise HTTPException(status_code=404, detail="Live data currently available for KJFK only.")
 
     try:
-        client = get_opensky_client()
+        client = get_opensky_client(
+            settings.OPENSKY_USERNAME,
+            settings.OPENSKY_PASSWORD,
+        )
         states = client.get_all_traffic_jfk()
     except Exception as exc:
         logger.warning("OpenSky call failed: %s", exc)
@@ -243,7 +256,10 @@ def detect_live_incursions(airport_icao: str = Query("KJFK")):
     continuous stream with sub-second latency via WebSocket.
     """
     try:
-        client = get_opensky_client()
+        client = get_opensky_client(
+            settings.OPENSKY_USERNAME,
+            settings.OPENSKY_PASSWORD,
+        )
         states = client.get_ground_traffic_jfk()
     except Exception as exc:
         logger.warning("OpenSky call failed during detection: %s", exc)

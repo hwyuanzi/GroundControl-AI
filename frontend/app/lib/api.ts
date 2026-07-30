@@ -12,7 +12,11 @@ import type {
   GeoJSONCollection,
 } from "@/app/types";
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const PUBLIC_API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+const API_BASE =
+  typeof window === "undefined"
+    ? process.env.API_URL ?? PUBLIC_API_BASE
+    : PUBLIC_API_BASE;
 const V1 = `${API_BASE}/api/v1`;
 
 // Generic fetch wrapper with error handling
@@ -190,4 +194,3 @@ export const fetchTaxiRoute = async (req: RouteRequest): Promise<RouteData> => {
 
 export const fetchLiveDetection = (airport_icao = "KJFK") =>
   apiFetch<IncursionAlertLive[]>("/analytics/detect", { airport_icao });
-

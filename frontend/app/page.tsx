@@ -37,14 +37,6 @@ function StatCard({
   );
 }
 
-function SeverityBadge({ cat }: { cat: string }) {
-  return (
-    <span className={`badge-${cat}`} style={{ padding: "0.2rem 0.6rem", borderRadius: "6px", fontSize: "0.75rem", fontWeight: 700 }}>
-      Cat {cat}
-    </span>
-  );
-}
-
 function DangerAirportRow({ airport, rank }: { airport: Airport; rank: number }) {
   return (
     <Link href={`/airports/${airport.id}`} style={{ textDecoration: "none" }}>
@@ -93,11 +85,11 @@ export default async function HomePage() {
     // API not running yet — show placeholder UI
   }
 
-  const totalAirports = stats?.total_airports ?? 7000;
-  const totalAirlines = stats?.total_airlines ?? 800;
-  const totalIncursions = stats?.total_incursions ?? 1200;
-  const avgTaxi = stats?.avg_global_taxi_out_min ?? 16.4;
-  const catAB = stats?.category_a_b_count ?? 47;
+  const totalAirports = stats?.total_airports;
+  const totalAirlines = stats?.total_airlines;
+  const totalIncursions = stats?.total_incursions;
+  const avgTaxi = stats?.avg_global_taxi_out_min;
+  const catAB = stats?.category_a_b_count;
   const topAirports = stats?.top_danger_airports ?? [];
 
   return (
@@ -211,11 +203,11 @@ export default async function HomePage() {
           gap: "1rem",
           marginBottom: "3rem",
         }}>
-          <StatCard label="Airports Tracked" value={totalAirports.toLocaleString()} icon={Building2} color="#4d94ff" delay="0s" sub="Worldwide commercial airports" />
-          <StatCard label="Airlines Indexed" value={totalAirlines.toLocaleString()} icon={Plane} color="#00d4ff" delay="0.05s" sub="Active carriers globally" />
-          <StatCard label="Incursion Events" value={totalIncursions.toLocaleString()} icon={AlertTriangle} color="#f59e0b" delay="0.1s" sub="Documented since 2010" />
-          <StatCard label="Avg Taxi-Out Time" value={`${avgTaxi.toFixed(1)} min`} icon={Clock} color="#8b5cf6" delay="0.15s" sub="Global commercial average" />
-          <StatCard label="Cat A / B Events" value={catAB.toString()} icon={ShieldAlert} color="#ef4444" delay="0.2s" sub="Near-collision severity" />
+          <StatCard label="Airports Tracked" value={totalAirports?.toLocaleString() ?? "—"} icon={Building2} color="#4d94ff" delay="0s" sub="Records loaded in the database" />
+          <StatCard label="Airlines Indexed" value={totalAirlines?.toLocaleString() ?? "—"} icon={Plane} color="#00d4ff" delay="0.05s" sub="Records loaded in the database" />
+          <StatCard label="Incursion Events" value={totalIncursions?.toLocaleString() ?? "—"} icon={AlertTriangle} color="#f59e0b" delay="0.1s" sub="Demo records loaded locally" />
+          <StatCard label="Avg Taxi-Out Time" value={avgTaxi == null ? "—" : `${avgTaxi.toFixed(1)} min`} icon={Clock} color="#8b5cf6" delay="0.15s" sub="Average across loaded records" />
+          <StatCard label="Cat A / B Events" value={catAB?.toString() ?? "—"} icon={ShieldAlert} color="#ef4444" delay="0.2s" sub="Higher-severity demo records" />
         </div>
 
         {/* ─── Bottom Cards ────────────────────────────────────────────────────── */}

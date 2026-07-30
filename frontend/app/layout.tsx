@@ -1,13 +1,6 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/app/components/ui/Navigation";
-
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "GroundControl AI — Runway Safety & Taxi Optimization",
@@ -28,7 +21,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={inter.variable}>
+    <html lang="en">
       <body className="bg-[#080c14] text-white antialiased min-h-screen">
         <Navigation />
         <main style={{ paddingTop: "96px", paddingBottom: "2rem" }}>{children}</main>

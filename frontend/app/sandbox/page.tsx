@@ -12,7 +12,7 @@
  *   - 4 terminal areas: T1, T2, T4, T5, T7, T8
  */
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Plane, Play, Pause, RotateCcw, Zap, Info, AlertTriangle } from "lucide-react";
+import { Plane, Play, Pause, RotateCcw, Info, AlertTriangle } from "lucide-react";
 import type { SandboxAircraft, RoutingMode, SimulationMetrics } from "@/app/types";
 
 // JFK Layout nodes (Mapped to coordinate space for diagonal 'X' layout)
@@ -338,8 +338,6 @@ function detectConflicts(aircraft: SandboxAircraft[]): SandboxAircraft[] {
 export default function SandboxPage() {
   const canvasRef  = useRef<HTMLCanvasElement>(null);
   const frameRef   = useRef<number>(0);
-  const graphRef   = useRef(buildGraph());
-
   const [aircraft, setAircraft]   = useState<SandboxAircraft[]>([]);
   const [running,  setRunning]     = useState(false);
   const [mode,     setMode]        = useState<RoutingMode>("rule_based");
@@ -494,8 +492,8 @@ export default function SandboxPage() {
           <div className="glass-card" style={{ padding: "1.25rem", background: "rgba(0, 212, 255, 0.05)", borderLeft: "4px solid #00d4ff" }}>
             <h3 style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "0.5rem", color: "#fff" }}>How to use this Sandbox:</h3>
             <p style={{ fontSize: "0.8rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.5 }}>
-              1. Click <b>"Simulate Peak Traffic"</b> to spawn multiple aircraft. <br/>
-              2. Click <b>"Run"</b> to watch them navigate from Terminals to Runways.<br/>
+              1. Click <b>&quot;Simulate Peak Traffic&quot;</b> to spawn multiple aircraft. <br/>
+              2. Click <b>&quot;Run&quot;</b> to watch them navigate from Terminals to Runways.<br/>
               3. Toggle between <b>Rule-Based</b> (causes gridlock) and <b>AI-Optimized</b> (reroutes automatically to save CO₂).
             </p>
           </div>

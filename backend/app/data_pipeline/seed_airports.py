@@ -8,13 +8,10 @@ Data Sources:
 
 Run: python -m app.data_pipeline.seed_airports
 """
-import sys
-import os
 import io
 import csv
 import logging
 import requests
-import pandas as pd
 from sqlalchemy.orm import Session
 from app.core.database import engine, Base
 from app.models.models import Airport, Airline

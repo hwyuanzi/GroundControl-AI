@@ -22,9 +22,6 @@ class Settings(BaseSettings):
         "https://groundcontrol-ai.vercel.app",
     ]
 
-    # Mapbox (injected via env var)
-    MAPBOX_ACCESS_TOKEN: str = ""
-
     # OpenSky Network (optional - for live data)
     OPENSKY_USERNAME: str = ""
     OPENSKY_PASSWORD: str = ""
